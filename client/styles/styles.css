@@ -61,13 +61,15 @@ form input[type=text] {
 
 .chat {
     padding: 15px;
-    margin-bottom: 15px;
+    margin-bottom: 55px;
+    text-indent: 55px;
     background-color: #eee;
 }
 
 .chat .username {
     font-weight: 800;
-    font color: 'red';
+    background-color: #eea;
+    text-indent: 15px;
 }
 
 .chat:hover {

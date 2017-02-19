@@ -3,7 +3,7 @@
 {
   class App {
     constructor() {
-      this.server = 'http://parse.CAMPUS.hackreactor.com';
+      this.server = 'http://parse.sfm8.hackreactor.com/chatterbox/classes/messages';
       this.username = window.location.search.slice(10);   
     }
   }
@@ -18,6 +18,7 @@
   // $(document).ready(function () {
   // }); 
   $(document).ready(function () {
+    
     $('.username').on('click', function() {
       app.handleUsernameClick();
     });
@@ -25,21 +26,28 @@
     $('#msg').on('click', function() {
       app.handleSubmit();
     });
-    $('#roomRender').on('click', function() {
-      var $name = $('input[name=room]').val();
-      //app.renderMessage($name);
-      app.renderRoom($name);
-    });
+
+    // $('#msg').on('click', function() {
+    //   app.handleSubmit();
+    // });
+    // $('#roomRender').on('click', function() {
+    //   var $name = $('input[name=room]').val();
+    //   //app.renderMessage($name);
+    //   app.renderRoom($name);
+    // });
     app.init();
   });
   App.prototype.init = () => {
-    this.server = 'http://parse.CAMPUS.hackreactor.com';
+    this.server = 'http://parse.sfm8.hackreactor.com/chatterbox/classes/messages';
     // var $element = $('<div/>').addClass('username');
     // $('#main').append($element);
     // var $message = $('<div>message</div>').addClass('submit');
     // $('#chats').append($);
     // app.renderMessage(message);
-    console.log(app.username);
+    app.renderRoom('room1');
+    app.renderRoom('room2');
+    app.renderRoom('room3');
+    
   };
   
   App.prototype.send = (message) => {
@@ -62,16 +70,23 @@
   App.prototype.fetch = () => {
     $.ajax({
     // This is the url you should use to communicate with the parse API server.
-      url: app.server,
+      url: 'http://parse.sfm8.hackreactor.com/chatterbox/classes/messages' + '?order=-createdAt&limit=1000',
       type: 'GET',
-      data: JSON.stringify(app.server),
-      contentType: 'application/json',
+      //data: JSON.stringify(app.server),
+      dataType: 'json',
+      // contentType: 'application/json',
       success: function (data) {
-        console.log('chatterbox: URL received');
+        console.log('chatterbox: data received');
+        app.clearMessages();
+        var arr = data.results;
+        for (var i = 0; i < arr.length; i++) {
+
+          app.renderMessage(arr[i]);
+        }
       },
       error: function (data) {
         // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
-        console.error('chatterbox: Failed to send message', data);
+        console.error('chatterbox: Failed to receive', data);
       }
     });
   };
@@ -95,7 +110,19 @@
     // });
   };
   App.prototype.renderMessage = (message) => {
-    var $element = $('<div class =username>' + app.username + '</div><div>' + message + '</div>');
+    message.username = message.username || 'anonymous';
+    if (message.text !== undefined) {
+      if (message.text.indexOf('<') >= 0 || message.text.indexOf('>') >= 0 ) {
+        if (message.username.indexOf('$(') >= 0) {
+          var sentence = 'failed';
+          var username = 'hack?';
+        }
+      } else {
+        sentence = message.text;
+        username = message.username;
+      }
+    }
+    var $element = $('<br><div class =username>' + username + '</div><div>' + sentence + '</div></br>');
     // $('<div/>', {
     //   class: 'username',
     //   // href: 'http://google.com',
@@ -105,7 +132,7 @@
     //   //`${message.username}: ${message.text}`
     // }).appendTo('#chats');
 
-    $('#chats').append($element);
+    $('.chat').append($element);
   };
   App.prototype.renderRoom = (name) => {
     $('<option/>', {
@@ -121,13 +148,20 @@
     //   class: 'username',
     //   text: 'a name'
     // }).appendTo('#main');
-    app.renderMessage($('input[name=im]').val());
+    // app.renderMessage($('input[name=im]').val());
   };
   App.prototype.handleSubmit = () => {
-    app.renderMessage($('#message').val());
+    var postRequest = {
+      username: app.username,
+      text: $('#message').val(),
+      roomname: $('select').find('option:selected').val()
+    };
+    app.prototype.send(postRequest);
+    // app.renderMessage($('#message').val());
     // var $message = $('<div/>').addClass('submit');
     // $('#send .submit').append($message);
   };
+  setInterval(function() { app.fetch(); }, 3000);
 }
 
 
